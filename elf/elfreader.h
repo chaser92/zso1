@@ -6,9 +6,9 @@
 
 struct elfinfo {
     void* raw;
-    Elf64_Ehdr* header;
-    Elf64_Shdr* sht;
-    Elf64_Phdr* pht;
+    Elf32_Ehdr* header;
+    Elf32_Shdr* sht;
+    Elf32_Phdr* pht;
     int sht_len;
     int pht_len;
 };
@@ -16,9 +16,9 @@ struct elfinfo {
 struct dyninfo {
     struct elfinfo* elf;
     char* strtab;
-    Elf64_Sym* symtab;
-    Elf64_Rel* rel;
-    Elf64_Word* hashtab;
+    Elf32_Sym* symtab;
+    Elf32_Rel* rel;
+    Elf32_Word* hashtab;
     int rel_size;
     int rel_entry;
 };
