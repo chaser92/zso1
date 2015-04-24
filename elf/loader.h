@@ -6,8 +6,8 @@ extern "C" {
 #endif
 
 struct library;
-struct library *library_load
-    (const char *name, void *(*getsym)(const char *name));
+
+struct library *library_load(const char *name, void *(*getsym)(const char *name));
 void *library_getsym(struct library *lib, const char *name);
 
 #ifdef __cplusplus

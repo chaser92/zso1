@@ -1,5 +1,3 @@
-// Copyright 1 2
-
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -8,27 +6,32 @@
 
 #include <stdio.h>
 
+#include "./err.h"
 #include "./elfreader.h"
 
 int fd_length(int fd) {
     struct stat buf;
-    fstat(fd, &buf);
+    if (fstat(fd, &buf) < 0) {
+        syserr("fstat");
+    };
     return buf.st_size;
 }
 
-int load_elf(const char* filename, struct elfinfo* elf) {
+void load_elf(const char* filename, struct elfinfo* elf) {
     int fd = open(filename, O_RDONLY);
     if (fd < 0) {
-        return fd;
+        syserr("load_elf");
     }
     // TODO(c) error check the mmap
     elf->raw = mmap(NULL, fd_length(fd), PROT_READ, MAP_PRIVATE, fd, 0);
+    if (elf->raw == MAP_FAILED) {
+        syserr("mmap");
+    }
     elf->header = (Elf32_Ehdr*)elf->raw;
     elf->sht = (Elf32_Shdr*)(elf->raw + elf->header->e_shoff);
     elf->pht = (Elf32_Phdr*)(elf->raw + elf->header->e_phoff);
     elf->sht_len = elf->header->e_shnum;
     elf->pht_len = elf->header->e_phnum;
-    return 0;
 }
 
 int determine_program_size(struct elfinfo* elf) {
@@ -79,6 +82,5 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
             }
         }
     }
-
     return dyn;
 }

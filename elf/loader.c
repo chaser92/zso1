@@ -1,10 +1,10 @@
-// Copyright 1 2
 #include <stdlib.h>
 
 #include "./elfreader.h"
 #include "./elfhash.h"
 #include "./allocator.h"
 #include "./relocator.h"
+#include "./err.h"
 
 struct library {
     struct elfinfo elf;
@@ -14,6 +14,9 @@ struct library {
 
 struct library* library_load (const char *name, void *(*getsym)(const char *name)) {
     struct library* lib = (struct library*)malloc(sizeof(struct library));
+    if (lib == NULL) {
+        syserr("malloc");
+    }
     load_elf(name, &lib->elf);
     lib->mem = alloc_memory(&lib->elf);
     load_segments(lib->mem, &lib->elf);

@@ -13,11 +13,13 @@ void do_apply_relocations(void* mem, struct dyninfo* dyn, Elf32_Rel* reltab, int
         char* name = &dyn->strtab[dyn->symtab[rel_sym].st_name];
         Elf32_Addr sym_value = dyn->symtab[rel_sym].st_value;
         void* destination;
-        if (sym_value == STN_UNDEF) {
-            destination = getsym(name);
-        } else {
-            destination = mem + sym_value;
-        }
+        if (rel_type != R_386_RELATIVE) {
+            if (sym_value == STN_UNDEF) {
+                destination = getsym(name);
+            } else {
+                destination = mem + sym_value;
+            }
+        } 
         switch (rel_type) {
             case R_386_32:  // S + A
                 rel = destination + addend;

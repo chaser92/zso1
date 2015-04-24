@@ -1,5 +1,3 @@
-// Copyright 1 2
-
 #ifndef __RELOCATOR_H
 #define __RELOCATOR_H
 

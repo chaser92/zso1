@@ -1,5 +1,3 @@
-// Copyright 1 2
-
 #include <string.h>
 
 #include "./elfreader.h"

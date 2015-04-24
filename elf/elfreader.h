@@ -1,4 +1,3 @@
-// Copyright 1 2
 #ifndef __ELFREADER_H
 #define __ELFREADER_H
 
@@ -25,7 +24,7 @@ struct dyninfo {
     int rel_entry;
 };
 
-int load_elf(const char* fn, struct elfinfo* target);
+void load_elf(const char* fn, struct elfinfo* target);
 int determine_program_size(struct elfinfo*);
 struct dyninfo load_dynamic(struct elfinfo* elf);
 
