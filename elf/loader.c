@@ -3,6 +3,7 @@
 
 #include "./elfreader.h"
 #include "./elfhash.h"
+#include "./relocator.h"
 
 struct library {
     struct elfinfo elf;
@@ -17,6 +18,7 @@ struct library* library_load (const char *name, void *(*getsym)(const char *name
     lib->mem = alloc_memory(&lib->elf);
     load_segments(lib->mem, &lib->elf);
     lib->dyn = load_dynamic(&lib->elf);
+    apply_relocations(lib->mem, &lib->dyn, getsym);
     return lib;
 }
 

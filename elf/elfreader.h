@@ -1,6 +1,6 @@
 // Copyright 1 2
-#ifndef __ELF_H
-#define __ELF_H
+#ifndef __ELFREADER_H
+#define __ELFREADER_H
 
 #include <elf.h>
 
@@ -17,7 +17,7 @@ struct dyninfo {
     struct elfinfo* elf;
     char* strtab;
     Elf32_Sym* symtab;
-    Elf32_Rel* rel;
+    Elf32_Rel* reltab;
     Elf32_Word* hashtab;
     int rel_size;
     int rel_entry;

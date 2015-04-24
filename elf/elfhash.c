@@ -19,18 +19,19 @@ unsigned long elf_hash(const unsigned char *name) {
 void* resolve_symbol(void* mem, struct dyninfo* dyn, const char *name) {
     unsigned long hash = elf_hash(name);
     Elf32_Word nbucket = dyn->hashtab[0];
+    Elf32_Word* chaintab = &dyn->hashtab[nbucket + BUCKET_OFFSET];
     printf("Resolving symbol %s, there are %d buckets\n", name, dyn->hashtab[0]);
     int bucket_id = hash % nbucket;
     printf("Will select bucket %d\n", bucket_id);
-    Elf32_Word* chain = &dyn->hashtab[dyn->hashtab[bucket_id + BUCKET_OFFSET + nbucket]];
+    Elf32_Word* chain = &dyn->hashtab[bucket_id + BUCKET_OFFSET];
     while (*chain != STN_UNDEF) {
         printf("Chain %d\n", *chain);
-        char* node_name = &dyn->strtab[dyn->symtab[*chain - 1].st_name];
+        char* node_name = &dyn->strtab[dyn->symtab[*chain].st_name];
         printf("%s\n", node_name);
         if (strcmp(node_name, name) == 0) {
-            printf("I found love @ %x!\n", dyn->elf->raw + dyn->symtab[*chain - 1].st_value);
-            return mem + dyn->symtab[*chain - 1].st_value;
+            printf("I found love @ %x!\n", dyn->elf->raw + dyn->symtab[*chain].st_value);
+            return mem + dyn->symtab[*chain].st_value;
         }
-        chain++;
+        chain = &chaintab[*chain];
     }
 }

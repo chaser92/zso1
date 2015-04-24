@@ -23,7 +23,7 @@ int load_elf(const char* filename, struct elfinfo* elf) {
     elf->pht = (Elf32_Phdr*)(elf->raw + elf->header->e_phoff);
     elf->sht_len = elf->header->e_shnum;
     elf->pht_len = elf->header->e_phnum;
-    printf("sht %d\n", elf->sht);
+    printf("sht %x\n", elf->sht);
     return 0;
 }
 
@@ -54,10 +54,10 @@ void load_segments(void* mem_start, struct elfinfo* elf) {
     printf("load_segments\n");
     for (int i = 0; i < elf->pht_len; i++) {
         if (elf->pht[i].p_type == PT_LOAD) {
-            printf("%lld\n", elf->pht[i].p_offset);
+            /*printf("%lld\n", elf->pht[i].p_offset);
             printf("%lld\n", elf->pht[i].p_vaddr);
             printf("%lld\n", elf->pht[i].p_filesz);
-            printf("%lld\n", elf->pht[i].p_memsz);
+            printf("%lld\n", elf->pht[i].p_memsz);*/
             memcpy(mem_start + elf->pht[i].p_vaddr,
                 elf->raw + elf->pht[i].p_offset, elf->pht[i].p_filesz);
         }
@@ -69,6 +69,7 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
 
     struct dyninfo dyn;
     dyn.elf = elf;
+    dyn.rel_size = 0;
     for (int i = 0; i < elf->sht_len; i++) {
         if (elf->sht[i].sh_type == SHT_DYNAMIC) {
             printf("SHT_dynamic %d\n", 0);
@@ -86,7 +87,7 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
                         break;
                     case DT_REL:
                         printf("You are in a dark room. You see DT_REL. What do you do?\n");
-                        dyn.rel = elf->raw + dyns[i].d_un.d_ptr;
+                        dyn.reltab = elf->raw + dyns[i].d_un.d_ptr;
                         break;
                     case DT_RELSZ:
                         printf("Found a few grams of DT_RELSZ!\n");
@@ -102,10 +103,6 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
     }
 
     return dyn;
-}
-
-void apply_relocations(void* mem, struct dyninfo* dyn) {
-    // TODO(chaser)
 }
 
 int fd_length(int fd) {
