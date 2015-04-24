@@ -10,8 +10,13 @@
 
 #include "./elfreader.h"
 
+int fd_length(int fd) {
+    struct stat buf;
+    fstat(fd, &buf);
+    return buf.st_size;
+}
+
 int load_elf(const char* filename, struct elfinfo* elf) {
-    printf("load_elf\n");
     int fd = open(filename, O_RDONLY);
     if (fd < 0) {
         return fd;
@@ -23,7 +28,6 @@ int load_elf(const char* filename, struct elfinfo* elf) {
     elf->pht = (Elf32_Phdr*)(elf->raw + elf->header->e_phoff);
     elf->sht_len = elf->header->e_shnum;
     elf->pht_len = elf->header->e_phnum;
-    printf("sht %x\n", elf->sht);
     return 0;
 }
 
@@ -39,27 +43,7 @@ int determine_program_size(struct elfinfo* elf) {
     return max;
 }
 
-void* alloc_memory(struct elfinfo* elf) {
-    int size = determine_program_size(elf);
-    void* mem = valloc(size);
-    if (mprotect(mem, size, (PROT_READ | PROT_WRITE |PROT_EXEC))) {
-        exit(-1);
-    }
-    return mem;
-}
-
-void load_segments(void* mem_start, struct elfinfo* elf) {
-    for (int i = 0; i < elf->pht_len; i++) {
-        if (elf->pht[i].p_type == PT_LOAD) {
-            memcpy(mem_start + elf->pht[i].p_vaddr,
-                elf->raw + elf->pht[i].p_offset, elf->pht[i].p_filesz);
-        }
-    }
-}
-
 struct dyninfo load_dynamic(struct elfinfo* elf) {
-    printf("load_dynamic\n");
-
     struct dyninfo dyn;
     dyn.elf = elf;
     dyn.rel_size = 0;
@@ -97,10 +81,4 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
     }
 
     return dyn;
-}
-
-int fd_length(int fd) {
-    struct stat buf;
-    fstat(fd, &buf);
-    return buf.st_size;
 }

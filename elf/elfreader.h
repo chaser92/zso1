@@ -25,11 +25,8 @@ struct dyninfo {
     int rel_entry;
 };
 
-int fd_length(int fd);
 int load_elf(const char* fn, struct elfinfo* target);
 int determine_program_size(struct elfinfo*);
-void load_segments(void* mem_start, struct elfinfo* elf);
 struct dyninfo load_dynamic(struct elfinfo* elf);
-void* alloc_memory(struct elfinfo* elf);
 
 #endif

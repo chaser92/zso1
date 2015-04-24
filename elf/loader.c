@@ -3,6 +3,7 @@
 
 #include "./elfreader.h"
 #include "./elfhash.h"
+#include "./allocator.h"
 #include "./relocator.h"
 
 struct library {
@@ -12,7 +13,6 @@ struct library {
 };
 
 struct library* library_load (const char *name, void *(*getsym)(const char *name)) {
-    printf("library_load %s\n", name);
     struct library* lib = (struct library*)malloc(sizeof(struct library));
     load_elf(name, &lib->elf);
     lib->mem = alloc_memory(&lib->elf);

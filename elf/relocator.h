@@ -7,4 +7,4 @@
 
 void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const char *name));
 
-#endif __RELOCATOR_H
+#endif
