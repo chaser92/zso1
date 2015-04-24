@@ -4,7 +4,7 @@
 
 void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const char *name)) {
     int num_rel = dyn->rel_size / sizeof(Elf32_Rel);
-    printf("ss  %d\n", dyn->rel_size );
+    printf("Applying relocations. Mem starts at 0x%x\n", mem);
     for (int i=0; i<num_rel; i++) {
         printf("%x\n", dyn->reltab[i].r_offset);
         Elf32_Addr addend = *(Elf32_Addr*)&mem[dyn->reltab[i].r_offset];
@@ -12,13 +12,13 @@ void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const cha
         int rel_sym = ELF32_R_SYM(dyn->reltab[i].r_info);
         char* name = &dyn->strtab[dyn->symtab[rel_sym].st_name];
         Elf32_Addr sym_value = dyn->symtab[rel_sym].st_value;
-        Elf32_Addr destination;
+        void* destination;
         if (sym_value == STN_UNDEF) {
             destination = getsym(name);
         } else {
             destination = &mem[sym_value];
         }
-        printf("Symbol %s resolved to addr 0x%x\n", name, sym_value);
+        printf("Symbol %s resolved to addr 0x%x\n", name, destination);
         Elf32_Addr rel;
         switch(rel_type) {
             /*
@@ -29,11 +29,11 @@ void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const cha
             */
             case R_386_32: // S + A
                 printf("Relocation R_386_32\n");
-                rel = destination + addend;
+                rel = &destination[addend];
             break;
             case R_386_PC32: // S + A - P
                 printf("Relocation R_386_PC32\n");
-                // rel = destination + addend - 
+                rel = destination + addend - mem - dyn->reltab[i].r_offset;
             break;
             case R_386_JMP_SLOT: // S
                 printf("Relocation R_386_JMP_SLOT\n");
@@ -44,10 +44,11 @@ void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const cha
                 rel = destination;
             break;
             case R_386_RELATIVE: // B + A
-                printf("Relocation R_386_RELATIVE\n");
-                rel = mem + addend;
+                printf("Relocation R_386_RELATIVE of 0x%x relo to 0x%x\n", addend, mem + addend);
+                rel = &mem[addend];
             break;
         }
+        printf("Relocating at address 0x%x \n", &mem[dyn->reltab[i].r_offset]);
         memcpy(&mem[dyn->reltab[i].r_offset], &rel, sizeof(Elf32_Addr));
     }
 }

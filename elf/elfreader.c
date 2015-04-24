@@ -28,7 +28,6 @@ int load_elf(const char* filename, struct elfinfo* elf) {
 }
 
 int determine_program_size(struct elfinfo* elf) {
-    printf("determine_program_size\n");
     int max = 0;
     for (int i = 0; i < elf->pht_len; i++) {
         if (elf->pht[i].p_type == PT_LOAD) {
@@ -41,7 +40,6 @@ int determine_program_size(struct elfinfo* elf) {
 }
 
 void* alloc_memory(struct elfinfo* elf) {
-    printf("alloc\n");
     int size = determine_program_size(elf);
     void* mem = valloc(size);
     if (mprotect(mem, size, (PROT_READ | PROT_WRITE |PROT_EXEC))) {
@@ -51,13 +49,8 @@ void* alloc_memory(struct elfinfo* elf) {
 }
 
 void load_segments(void* mem_start, struct elfinfo* elf) {
-    printf("load_segments\n");
     for (int i = 0; i < elf->pht_len; i++) {
         if (elf->pht[i].p_type == PT_LOAD) {
-            /*printf("%lld\n", elf->pht[i].p_offset);
-            printf("%lld\n", elf->pht[i].p_vaddr);
-            printf("%lld\n", elf->pht[i].p_filesz);
-            printf("%lld\n", elf->pht[i].p_memsz);*/
             memcpy(mem_start + elf->pht[i].p_vaddr,
                 elf->raw + elf->pht[i].p_offset, elf->pht[i].p_filesz);
         }
@@ -72,29 +65,23 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
     dyn.rel_size = 0;
     for (int i = 0; i < elf->sht_len; i++) {
         if (elf->sht[i].sh_type == SHT_DYNAMIC) {
-            printf("SHT_dynamic %d\n", 0);
             int numDyns = elf->sht[i].sh_size / elf->sht[i].sh_entsize;
             Elf32_Dyn* dyns = (Elf32_Dyn*)(elf->raw + elf->sht[i].sh_offset);
             for (int i = 0; i < numDyns; i++) {
-                printf("dtag%d\n", dyns[i].d_tag);
                 switch (dyns[i].d_tag) {
                     case DT_STRTAB:
-                        printf("You are in a dark room. You see DT_STRTAB @ . 0x%x\n", dyns[i].d_un.d_ptr);
                         dyn.strtab = elf->raw + dyns[i].d_un.d_ptr;
                         break;
                     case DT_SYMTAB:
                         dyn.symtab = elf->raw + dyns[i].d_un.d_ptr;
                         break;
                     case DT_REL:
-                        printf("You are in a dark room. You see DT_REL. What do you do?\n");
                         dyn.reltab = elf->raw + dyns[i].d_un.d_ptr;
                         break;
                     case DT_RELSZ:
-                        printf("Found a few grams of DT_RELSZ!\n");
                         dyn.rel_size = dyns[i].d_un.d_val;
                         break;
                     case DT_HASH:
-                        printf("Found a few grams of hash! at 0x%x \n", dyns[i].d_un.d_ptr);
                         dyn.hashtab = elf->raw + dyns[i].d_un.d_ptr;
                         break;
                 }
@@ -108,6 +95,5 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
 int fd_length(int fd) {
     struct stat buf;
     fstat(fd, &buf);
-    printf("Program size is %d\n", buf.st_size);
     return buf.st_size;
 }

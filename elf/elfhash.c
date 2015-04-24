@@ -30,7 +30,7 @@ void* resolve_symbol(void* mem, struct dyninfo* dyn, const char *name) {
         printf("%s\n", node_name);
         if (strcmp(node_name, name) == 0) {
             printf("I found love @ %x!\n", dyn->elf->raw + dyn->symtab[*chain].st_value);
-            return mem + dyn->symtab[*chain].st_value;
+            return &mem[dyn->symtab[*chain].st_value];
         }
         chain = &chaintab[*chain];
     }
