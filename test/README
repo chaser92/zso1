@@ -3,12 +3,12 @@ Obsługa:
  - wykonać make test
 
 Punktacja za testy to:
- - 1.75 punkta za addsub
- - 1.75 punkta za hello
- - 1.75 punkta za var
- - 1.75 punkta za ptr
- - 1.75 punkta za textrel
- - 1.75 punkta za regparm
+ - 1.33 punkta za addsub
+ - 1.33 punkta za hello
+ - 1.34 punkta za var
+ - 1.34 punkta za ptr
+ - 1.33 punkta za textrel
+ - 1.33 punkta za regparm
  - 2 punkty za lazy wykonane faktycznie w wersji lazy
 
 Punktacja za zadanie = punktacja za testy - kary za błędy w kodzie

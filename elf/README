@@ -1,0 +1,10 @@
+Rozwiązanie zaimplementowane przeze mnie polega na :
+1. zmapowaniu pliku ELF do pamięci, aby móc sprawnie przeanalizować jego zawartość,
+2. zaalokowaniu pamięci potrzebnej do przechowywania wszystkich wymaganych segmentów biblioteki (poszukiwanie największego adresu relatywnego),
+3. skopiowania zawartości segmentów z pliku do pamięci i wyzerowania części segmentów, które nie mają odpowiednika w pliku,
+4. przejścia pliku ELF celem odnalezienia potrzebnych struktur do rozwiązywania zależności i relokacji,
+5. zaaplikowaniu relokacji.
+
+Udostępniony jest również interfejs, który na żądanie użytkownika pobiera adres symbolu o nazwie podanej przez użytkownika za pomocą haszmapy dostarczonej w pliku ELF. Korzysta on z uprzednio znalezionych struktur: haszmapy, tablicy symboli i tablicy stringów.
+
+Nie zostało zaimplementowane wiązanie leniwe.
