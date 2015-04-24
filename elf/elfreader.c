@@ -63,6 +63,7 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
     struct dyninfo dyn;
     dyn.elf = elf;
     dyn.rel_size = 0;
+    dyn.jmprel_size = 0;
     for (int i = 0; i < elf->sht_len; i++) {
         if (elf->sht[i].sh_type == SHT_DYNAMIC) {
             int numDyns = elf->sht[i].sh_size / elf->sht[i].sh_entsize;
@@ -80,6 +81,12 @@ struct dyninfo load_dynamic(struct elfinfo* elf) {
                         break;
                     case DT_RELSZ:
                         dyn.rel_size = dyns[i].d_un.d_val;
+                        break;
+                    case DT_JMPREL:
+                        dyn.jmpreltab = elf->raw + dyns[i].d_un.d_ptr;
+                        break;
+                    case DT_PLTRELSZ:
+                        dyn.jmprel_size = dyns[i].d_un.d_val;
                         break;
                     case DT_HASH:
                         dyn.hashtab = elf->raw + dyns[i].d_un.d_ptr;

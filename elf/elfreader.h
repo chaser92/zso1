@@ -18,8 +18,10 @@ struct dyninfo {
     char* strtab;
     Elf32_Sym* symtab;
     Elf32_Rel* reltab;
+    Elf32_Rel* jmpreltab;
     Elf32_Word* hashtab;
     int rel_size;
+    int jmprel_size;
     int rel_entry;
 };
 

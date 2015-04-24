@@ -2,14 +2,15 @@
 
 #include <elf.h>
 
-void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const char *name)) {
-    int num_rel = dyn->rel_size / sizeof(Elf32_Rel);
+void do_apply_relocations(void* mem, struct dyninfo* dyn, Elf32_Rel* reltab, int rel_size, void *(*getsym)(const char *name)) {
+    int num_rel = rel_size / sizeof(Elf32_Rel);
     printf("Applying relocations. Mem starts at 0x%x\n", mem);
+    printf("Will relocate %d elements.\n", num_rel);
     for (int i=0; i<num_rel; i++) {
-        printf("%x\n", dyn->reltab[i].r_offset);
-        Elf32_Addr addend = *(Elf32_Addr*)&mem[dyn->reltab[i].r_offset];
-        int rel_type = ELF32_R_TYPE(dyn->reltab[i].r_info);
-        int rel_sym = ELF32_R_SYM(dyn->reltab[i].r_info);
+        printf("%x\n", reltab[i].r_offset);
+        Elf32_Addr addend = *(Elf32_Addr*)&mem[reltab[i].r_offset];
+        int rel_type = ELF32_R_TYPE(reltab[i].r_info);
+        int rel_sym = ELF32_R_SYM(reltab[i].r_info);
         char* name = &dyn->strtab[dyn->symtab[rel_sym].st_name];
         Elf32_Addr sym_value = dyn->symtab[rel_sym].st_value;
         void* destination;
@@ -33,7 +34,7 @@ void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const cha
             break;
             case R_386_PC32: // S + A - P
                 printf("Relocation R_386_PC32\n");
-                rel = destination + addend - mem - dyn->reltab[i].r_offset;
+                rel = destination + addend - mem - reltab[i].r_offset;
             break;
             case R_386_JMP_SLOT: // S
                 printf("Relocation R_386_JMP_SLOT\n");
@@ -48,7 +49,13 @@ void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const cha
                 rel = &mem[addend];
             break;
         }
-        printf("Relocating at address 0x%x \n", &mem[dyn->reltab[i].r_offset]);
-        memcpy(&mem[dyn->reltab[i].r_offset], &rel, sizeof(Elf32_Addr));
+        printf("Relocating at address 0x%x \n", &mem[reltab[i].r_offset]);
+        memcpy(&mem[reltab[i].r_offset], &rel, sizeof(Elf32_Addr));
     }
+}
+
+void apply_relocations(void* mem, struct dyninfo* dyn, void *(*getsym)(const char *name)) {
+    do_apply_relocations(mem, dyn, dyn->reltab, dyn->rel_size, getsym);
+    printf("%x", dyn->jmpreltab);
+    do_apply_relocations(mem, dyn, dyn->jmpreltab, dyn->jmprel_size, getsym);
 }
